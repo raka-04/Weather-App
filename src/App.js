@@ -1,23 +1,110 @@
 import logo from './logo.svg';
 import './App.css';
+import { useState } from 'react';
+import clear from './Data/clear.mp4';
+import cloudy from './Data/cloudy.mp4';
+import rain from './Data/rain.mp4';
+import snow from './Data/snow.mp4';
 
 function App() {
+  let [city,setcity]=useState('')
+  let [allDetail,setallDetail]=useState()
+  let getData=(event)=>{
+    event.preventDefault();
+    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=9f668ade9621eff2e8c942671ad9875d`)
+    .then((res)=>res.json())
+    .then((finaldata)=>{
+      console.log(finaldata)
+      setallDetail(finaldata)
+    })
+    
+    setcity('')
+  }
+  const getWeatherVideo = (condition) => {
+    switch (condition?.toLowerCase()) {
+      case 'clear':
+        return clear;
+      case 'clouds':
+        return cloudy;
+      case 'rain':
+        return rain;
+      case 'snow':
+        return snow;
+      default:
+        return null; 
+    }
+  };
+
+  const weatherCondition = allDetail?.weather?.[0]?.main;
+  const videoSrc = getWeatherVideo(weatherCondition);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className={`relative w-full min-h-screen overflow-hidden ${!videoSrc ? 'bg-slate-800' : ''}`}>
+      
+      {videoSrc && (
+        <>
+          <video
+            key={videoSrc} 
+            className="absolute top-0 left-0 w-full h-full object-cover z-0"
+            autoPlay
+            muted
+            loop
+          >
+            <source src={videoSrc} type="video/mp4" />
+          </video>
+          <div className="absolute top-0 left-0 w-full h-full bg-slate-900 bg-opacity-70 z-10" />
+        </>
+      )}
+
+      <div className="relative z-20 w-full min-h-screen text-center flex flex-col items-center pt-[60px]">
+        <h1 className="text-5xl font-bold text-white mb-10">Weather App</h1>
+
+        <div className="flex items-center bg-white rounded-full shadow-md px-4 py-2 w-80">
+          <form
+            onSubmit={getData}
+            className="flex items-center bg-white rounded-full shadow-md px-2 py-2 w-80"
+          >
+            <input
+              type="text"
+              placeholder="Enter a valid city name..."
+              value={city}
+              onChange={(e) => setcity(e.target.value)}
+              className="outline-none flex-1 text-gray-700 bg-transparent"
+            />
+            <button
+              type="submit"
+              className="text-white bg-slate-600 hover:bg-slate-700 px-3 py-1 rounded-full text-sm ml-8"
+            >
+              Search
+            </button>
+          </form>
+        </div>
+
+
+        <div className="mt-8 text-white">
+          {allDetail && allDetail.cod === 200 ? (
+            <div className="bg-slate-700 p-4 rounded-xl shadow-lg w-80 mx-auto">
+              <h2 className="text-xl font-semibold mb-2">
+                {allDetail.name}, {allDetail.sys.country}
+              </h2>
+              <p>Temperature: {(allDetail.main.temp - 273.15).toFixed(1)}°C</p>
+              <p>Weather: {allDetail.weather[0].description}</p>
+              <p>Humidity: {allDetail.main.humidity}%</p>
+              <p>Wind Speed: {allDetail.wind.speed} m/s</p>
+              <p>
+                Longitude: {allDetail.coord.lon}   
+              </p>
+              <p>
+                Latitude: {allDetail.coord.lat}
+              </p>
+            </div>
+          ) : allDetail && allDetail.cod === '404' ? (
+            <p className="text-red-400 font-medium">No data found</p>
+          ) : (
+            <p className="text-gray-300">No data found</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
