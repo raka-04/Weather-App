@@ -9,6 +9,7 @@ import snow from './Data/snow.mp4';
 function App() {
   let [city,setcity]=useState('')
   let [allDetail,setallDetail]=useState()
+
   let getData=(event)=>{
     event.preventDefault();
     fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=9f668ade9621eff2e8c942671ad9875d`)
@@ -17,7 +18,6 @@ function App() {
       console.log(finaldata)
       setallDetail(finaldata)
     })
-    
     setcity('')
   }
   const getWeatherVideo = (condition) => {
@@ -40,8 +40,9 @@ function App() {
 
   return (
     <div className={`relative w-full min-h-screen overflow-hidden ${!videoSrc ? 'bg-slate-800' : ''}`}>
-      
+      {/* Conditional video background */}
       {videoSrc && (
+        
         <>
           <video
             key={videoSrc} 
@@ -56,31 +57,35 @@ function App() {
         </>
       )}
 
+      {/* Main Content */}
       <div className="relative z-20 w-full min-h-screen text-center flex flex-col items-center pt-[60px]">
-        <h1 className="text-5xl font-bold text-white mb-10">Weather App</h1>
+        <h1 className="text-4xl sm:text-5xl font-bold text-white mb-2">
+          ClimoCast
+        </h1>
+        <p className="text-white text-sm sm:text-base italic mb-6 fade-in-subtitle">
+          Instant weather, one search away.
+        </p>
 
-        <div className="flex items-center bg-white rounded-full shadow-md px-4 py-2 w-80">
-          <form
-            onSubmit={getData}
-            className="flex items-center bg-white rounded-full shadow-md px-2 py-2 w-80"
-          >
-            <input
-              type="text"
-              placeholder="Enter a valid city name..."
-              value={city}
-              onChange={(e) => setcity(e.target.value)}
-              className="outline-none flex-1 text-gray-700 bg-transparent"
-            />
-            <button
-              type="submit"
-              className="text-white bg-slate-600 hover:bg-slate-700 px-3 py-1 rounded-full text-sm ml-8"
-            >
-              Search
-            </button>
-          </form>
-        </div>
+        <form
+  onSubmit={getData}
+  className="flex items-center bg-white rounded-full shadow-md px-3 py-2 w-50 max-w-sm"
+>
+  <input
+    type="text"
+    placeholder="Enter a valid city name..."
+    value={city}
+    onChange={(e) => setcity(e.target.value)}
+    className="outline-none flex-1 text-gray-700 bg-transparent text-sm"
+  />
+  <button
+    type="submit"
+    className="text-white bg-slate-600 hover:bg-slate-700 px-3 py-1 rounded-full text-sm ml-2"
+  >
+    Search
+  </button>
+</form>
 
-
+        {/* Weather Result Box */}
         <div className="mt-8 text-white">
           {allDetail && allDetail.cod === 200 ? (
             <div className="bg-slate-700 p-4 rounded-xl shadow-lg w-80 mx-auto">
@@ -92,19 +97,21 @@ function App() {
               <p>Humidity: {allDetail.main.humidity}%</p>
               <p>Wind Speed: {allDetail.wind.speed} m/s</p>
               <p>
-                Longitude: {allDetail.coord.lon}   
+                Longitude: {allDetail.coord.lon} Latitude: {allDetail.coord.lat}
               </p>
-              <p>
-                Latitude: {allDetail.coord.lat}
-              </p>
+              
             </div>
+            
           ) : allDetail && allDetail.cod === '404' ? (
             <p className="text-red-400 font-medium">No data found</p>
           ) : (
             <p className="text-gray-300">No data found</p>
           )}
         </div>
+        
       </div>
+       
+
     </div>
   );
 }
